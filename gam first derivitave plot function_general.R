@@ -264,7 +264,7 @@ deriv_plot2 <- function (model, term, main, eps, response = NULL, confidence=95,
   lower=(50-(confidence/2))/100
   
   newdat=model$data
-  newdat[,which(names(newdat)==gsub("\\(|\\)", "", main))]=newdat[,which(names(newdat)==gsub("\\(|\\)", "", main))]+eps
+  newdat[,which(names(newdat)==main)]=newdat[,which(names(newdat)==main)]+eps
   dir=posterior_smooths(model, smooth = term, resp=response)
   dir2=posterior_smooths(model, smooth = term, resp=response, newdata = newdat)
   
@@ -277,7 +277,7 @@ deriv_plot2 <- function (model, term, main, eps, response = NULL, confidence=95,
   der_data=data.frame(mean_der) %>%
     cbind(lower_der) %>%
     cbind(upper_der) %>%
-    cbind(model$data[,which(names(model$data)==gsub("\\(|\\)", "", main))])
+    cbind(model$data[,which(names(model$data)==main)])
   colnames(der_data)=c("mean","lower","upper","main")
   
   der_data$Significance=NA
