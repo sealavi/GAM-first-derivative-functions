@@ -237,6 +237,68 @@ deriv_plot <- function (model, term, main, eps, response = NULL, spaghetti=FALSE
   
 }
 
+##For one dimensional spline with by variable interaction 
+deriv_plot_by <- function (model, term,by_var, main, eps, response = NULL, spaghetti=FALSE, rug = TRUE, confidence=95,output){
+  require(dplyr)
+  require(ggplot2)
+  require(brms)
+  
+  ###model must be a brms model object
+  ###term is a character string of the smooth term, same syntax as used in the model
+  ###main is a character string of the predictor variable, must not be wrapped in a smooth function
+  ###eps is the amount to offset the original data, to be differenced from original to calculate slope
+  ###response is an optional character string indicating the response variable to use, only relevant in the multivariate case
+  ###confidence is the confidence level used to calculate the posterior intervals
+  ###The desired name of the resulting ggplot object 
+  Response=response
+  if(is.null(Response)){
+    Response=model$formula$resp
+  }
+  
+  if(length(names(model$data))>6){
+    model$data=model$data[,c(1:6)]
+  }
+  
+  upper=(50+(confidence/2))/100
+  lower=(50-(confidence/2))/100
+  
+  newdat=model$data
+  newdat[,which(names(newdat)==main)]=newdat[,which(names(newdat)==main)]+eps
+  dir=posterior_smooths(model, smooth = term, resp=response)
+  dir2=posterior_smooths(model, smooth = term, resp=response, newdata = newdat)
+  
+  dir_model=(dir2-dir)/eps
+  
+  mean_der <- apply(dir_model,MARGIN = 2,FUN = mean)
+  lower_der <- apply(dir_model,MARGIN = 2,FUN = quantile, prob = lower)
+  upper_der <- apply(dir_model,MARGIN = 2,FUN = quantile, prob = upper)
+  
+  der_data=data.frame(mean_der) %>%
+    cbind(lower_der) %>%
+    cbind(upper_der) %>%
+    cbind(model$data[,which(names(model$data)==main)]) %>%
+    cbind(model$data[,which(names(model$data)==by_var )])
+  colnames(der_data)=c("mean","lower","upper","main",by_var)
+
+  der_data$Significance=NA
+  der_data$Significance[which(sign(der_data$lower)!=sign(der_data$upper))]="Not Significant"
+  der_data$Significance[-which(sign(der_data$lower)!=sign(der_data$upper))]="Significant"
+  sigranges=tapply(der_data$main,as.factor(der_data$Significance),range)
+  der_data$Significance=as.factor(der_data$Significance)
+  
+  
+  derivplot=ggplot(der_data,aes(main,mean,group=1)) + 
+    geom_ribbon(aes(ymin = lower, ymax = upper), alpha = 0.2)+
+    geom_line(aes(color=Significance)) + 
+    geom_hline(yintercept = 0)+
+    ylab(expression(paste(italic("f(x)'")))) + xlab(paste(main))+
+    scale_color_manual(values = c("Significant" = "cyan",
+                                  "Not Significant"="black")) +
+    facet_wrap(as.formula(paste("~", by_var)))+
+    theme_classic()
+  
+  assign(output,derivplot, envir = parent.frame())
+}
 
 
 deriv_plot2 <- function (model, term, main, eps, response = NULL, confidence=95, output){
