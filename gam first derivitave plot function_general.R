@@ -21,8 +21,8 @@ species_interact_deriv <- function (model, term, main, eps, response = NULL, con
   
   newdat=model$data
   newdat[,which(names(newdat)==main)]=newdat[,which(names(newdat)==main)]+eps
-  dir=posterior_smooths(model, smooth = term, resp=response)
-  dir2=posterior_smooths(model, smooth = term, resp=response, newdata = newdat)
+  dir=posterior_smooths(model, smooth = term, resp=response, dpar = dpar)
+  dir2=posterior_smooths(model, smooth = term, resp=response, dpar = dpar, newdata = newdat)
   
   dir_model=(dir2-dir)/eps
   
@@ -109,7 +109,7 @@ species_interact_deriv <- function (model, term, main, eps, response = NULL, con
 }
 
 
-deriv_plot <- function (model, term, main, eps, response = NULL, spaghetti=FALSE, rug = TRUE, confidence=95,output){
+deriv_plot <- function (model, term, main, eps, response = NULL, dpar = NULL, spaghetti=FALSE, rug = TRUE, confidence=95,output){
   require(dplyr)
   require(ggplot2)
   require(brms)
@@ -135,8 +135,8 @@ deriv_plot <- function (model, term, main, eps, response = NULL, spaghetti=FALSE
   
   newdat=model$data
   newdat[,which(names(newdat)==main)]=newdat[,which(names(newdat)==main)]+eps
-  dir=posterior_smooths(model, smooth = term, resp=response)
-  dir2=posterior_smooths(model, smooth = term, resp=response, newdata = newdat)
+  dir=posterior_smooths(model, smooth = term, resp=response, dpar = dpar)
+  dir2=posterior_smooths(model, smooth = term, resp=response, dpar = dpar, newdata = newdat)
   
   dir_model=(dir2-dir)/eps
   
@@ -238,7 +238,7 @@ deriv_plot <- function (model, term, main, eps, response = NULL, spaghetti=FALSE
 }
 
 ##For one dimensional spline with by variable interaction 
-deriv_plot_by <- function (model, term,by_var, main, eps, response = NULL, spaghetti=FALSE, rug = TRUE, confidence=95,output){
+deriv_plot_by <- function (model, term,by_var, main, eps, response = NULL, dpar = NULL, spaghetti=FALSE, rug = TRUE, confidence=95,output){
   require(dplyr)
   require(ggplot2)
   require(brms)
@@ -264,8 +264,8 @@ deriv_plot_by <- function (model, term,by_var, main, eps, response = NULL, spagh
   
   newdat=model$data
   newdat[,which(names(newdat)==main)]=newdat[,which(names(newdat)==main)]+eps
-  dir=posterior_smooths(model, smooth = term, resp=response)
-  dir2=posterior_smooths(model, smooth = term, resp=response, newdata = newdat)
+  dir=posterior_smooths(model, smooth = term, resp=response, dpar = dpar)
+  dir2=posterior_smooths(model, smooth = term, resp=response, dpar = dpar, newdata = newdat)
   
   dir_model=(dir2-dir)/eps
   
@@ -301,7 +301,7 @@ deriv_plot_by <- function (model, term,by_var, main, eps, response = NULL, spagh
 }
 
 
-deriv_plot2 <- function (model, term, main, eps, response = NULL, confidence=95, output){
+deriv_plot2 <- function (model, term, main, eps, response = NULL, dpar = NULL, confidence=95, output){
   require(dplyr)
   require(ggplot2)
   require(brms)
@@ -327,8 +327,8 @@ deriv_plot2 <- function (model, term, main, eps, response = NULL, confidence=95,
   
   newdat=model$data
   newdat[,which(names(newdat)==main)]=newdat[,which(names(newdat)==main)]+eps
-  dir=posterior_smooths(model, smooth = term, resp=response)
-  dir2=posterior_smooths(model, smooth = term, resp=response, newdata = newdat)
+  dir=posterior_smooths(model, smooth = term, resp=response, dpar = dpar)
+  dir2=posterior_smooths(model, smooth = term, resp=response, dpar = dpar, newdata = newdat)
   
   dir_model=(dir2-dir)/eps
   
@@ -363,7 +363,7 @@ deriv_plot2 <- function (model, term, main, eps, response = NULL, confidence=95,
 
 ## function allowing for estimation of derivative at different confidence levels set by the user
 ## adapted to also include how much of derivative is on one side of 0
-deriv_plot_zprob <- function (model, dimensions = 1, by = FALSE, term, main, eps, response = NULL, spaghetti=FALSE, rug = TRUE, confidence=95,output, meanmain, sdmain){
+deriv_plot_zprob <- function (model, dimensions = 1, by = FALSE, term, main, eps, response = NULL, dpar = NULL, spaghetti=FALSE, rug = TRUE, confidence=95,output, meanmain, sdmain){
   require(dplyr)
   require(ggplot2)
   require(plotly)
@@ -423,11 +423,11 @@ deriv_plot_zprob <- function (model, dimensions = 1, by = FALSE, term, main, eps
   } 
   
   if(dimensions > 1){
-    #dir=posterior_smooths(model, smooth = term, resp=response)
-    dir2=posterior_smooths(model, smooth = term, resp=response, newdata = newdat)
-    dir2_b=posterior_smooths(model, smooth = term, resp=response, newdata = newdat_b)
-    dir2_c=posterior_smooths(model, smooth = term, resp=response, newdata = newdat_c)
-    dir2_d=posterior_smooths(model, smooth = term, resp=response, newdata = newdat_d)
+    #dir=posterior_smooths(model, smooth = term, resp=response, dpar = dpar)
+    dir2=posterior_smooths(model, smooth = term, resp=response, dpar = dpar, newdata = newdat)
+    dir2_b=posterior_smooths(model, smooth = term, resp=response, dpar = dpar, newdata = newdat_b)
+    dir2_c=posterior_smooths(model, smooth = term, resp=response, dpar = dpar, newdata = newdat_c)
+    dir2_d=posterior_smooths(model, smooth = term, resp=response, dpar = dpar, newdata = newdat_d)
     
     dir_model=(dir2-dir2_c-dir2_d+dir2_b)/(4*prod(eps))
     
